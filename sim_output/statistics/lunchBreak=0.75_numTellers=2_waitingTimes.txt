@@ -1,0 +1,3 @@
+mean: 2.2
+median: 2.6
+standard deviation: 1.1

@@ -1,0 +1,3 @@
+mean: 9.9
+median: 7.0
+standard deviation: 9.1

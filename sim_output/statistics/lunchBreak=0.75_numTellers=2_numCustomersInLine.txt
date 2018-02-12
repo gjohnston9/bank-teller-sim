@@ -1,0 +1,3 @@
+mean: 28.6
+median: 31.0
+standard deviation: 15.3
