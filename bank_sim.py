@@ -4,8 +4,7 @@ import argparse
 import os
 import time
 
-from engine import Engine
-from engine import Event
+from engine import Engine, Event
 import evaluation
 
 ### Events specific to this simulation
