@@ -1,9 +1,9 @@
 from scipy import stats
 
+import argparse
+
 from engine import Engine
 from engine import Event
-
-debug = False
 
 ### Events specific to this simulation
 ###
@@ -88,12 +88,12 @@ class TellerBecomesFree(Event):
 
 
 class BankSimulation():
-    def __init__(self):
+    def __init__(self, lunch_break_length, num_tellers):
         self.engine = Engine()
 
-        ### parameters (should be args)
-        self.lunch_break_length = 0.75
-        self.num_tellers = 2
+        ### parameters
+        self.lunch_break_length = lunch_break_length
+        self.num_tellers = num_tellers
 
         ### state variables
         self.t = 0 # current time
@@ -103,7 +103,7 @@ class BankSimulation():
         self.num_lunch = 0 # number of tellers on lunch break
         self.num_lunch_breaks_taken = 0
 
-        self.arrival_times = [] # used to determine waiting time for each customer
+        self.arrival_times = [] # used to calculate waiting time for each customer
         self.waiting_times = [] # returned after running simulation
 
     ### Utility functions 
@@ -166,5 +166,13 @@ class BankSimulation():
 
 
 if __name__ == "__main__":
-    sim = BankSimulation()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("lunch_break_length", type=float, help="length of each teller's lunch break (in hours)")
+    parser.add_argument("num_tellers", type=int, help="number of tellers at the bank")
+    parser.add_argument("--verbose", action="store_true", help="provide additional simulation output")
+
+    args = parser.parse_args()
+
+    debug = args.verbose
+    sim = BankSimulation(args.lunch_break_length, args.num_tellers)
     print(sim.run_simulation())
