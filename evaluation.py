@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 
 def get_statistics(lst):
     mean = sum(lst) / float(len(lst))
-    std_dev = np.std(lst)
     median = lst[len(lst)/2]
+    std_dev = np.std(lst)
 
-    return "mean: {}\nstandard deviation: {}\nmedian: {}".format(mean, std_dev, median)
+    return "mean: {:.1f}\nmedian: {:.1f}\nstandard deviation: {:.1f}\n".format(mean, median, std_dev)
+
 
 def save_plot(xy, title, xlabel, ylabel, file_name, lunch_break_times, lunch_break_length):
 	x, y = zip(*xy)

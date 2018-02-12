@@ -184,13 +184,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
     debug = args.verbose
 
+    print("running simulation with lunch break length {} and num_tellers {}".format(
+        args.lunch_break_length, args.num_tellers))
+
     start_time = time.time()
     sim = BankSimulation(args.lunch_break_length, args.num_tellers)
     results = sim.run_simulation()
     end_time = time.time()
 
     print("took {:.2f} seconds to run".format(end_time - start_time))
-    print(evaluation.get_statistics([w for t,w in results["waiting_times"]]))
+
+    for data, file_name in (
+        (results["waiting_times"], "waitingTimes"),
+        (results["num_waiting_list"], "numCustomersInLine")):
+
+        name = "lunchBreak={}_numTellers={}_{}.txt".format(args.lunch_break_length, args.num_tellers, file_name)
+        with open(os.path.join("sim_output", "statistics", name), "w") as f:
+            f.write(evaluation.get_statistics([w for t,w in data]))
 
     for data, title, file_name, xlabel, ylabel, time in (
         (results["waiting_times"], "waiting times", "waitingTimes", "arrival time", "waiting time", True),
@@ -198,5 +208,5 @@ if __name__ == "__main__":
             "number of customers in line", True)):
 
         plot_name = "lunchBreak={}_numTellers={}_{}.png".format(args.lunch_break_length, args.num_tellers, file_name)
-        plot_path = os.path.join("sim_output", plot_name)
+        plot_path = os.path.join("sim_output", "plots", plot_name)
         evaluation.save_plot(data, title, xlabel, ylabel, plot_path, results["lunch_break_times"], args.lunch_break_length)
