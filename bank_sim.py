@@ -1,6 +1,7 @@
 from scipy import stats
 
 import argparse
+import os
 import time
 
 from engine import Engine
@@ -27,7 +28,7 @@ class Arrival(Event):
             self.sim.num_waiting += 1
             self.sim.arrival_times.append(self.sim.t)
         else: # customer is immediately served
-            self.sim.waiting_times.append(0) # no waiting for this customer
+            self.sim.waiting_times.append([self.sim.t, 0]) # no waiting for this customer
             self.sim.num_idle -= 1 # a teller becomes busy
             self.sim.num_busy += 1
             transaction_time = self.sim.get_rand_customer_transaction_time() # schedule the end of the transaction
@@ -48,6 +49,7 @@ class FinishedService(Event):
         if (self.sim.will_i_take_a_lunch_break()):
             if debug: print("teller {} is taking a lunch break, starting at time {} and lasting for {} hours".format(
                 self.sim.num_lunch_breaks_taken, self.sim.t, self.sim.lunch_break_length))
+            self.sim.lunch_break_times.append(self.sim.t)
             self.sim.num_lunch_breaks_taken += 1
             self.sim.num_idle -= 1 # the teller who just finished takes a lunch break
             self.sim.num_lunch += 1
@@ -79,7 +81,7 @@ class TellerBecomesFree(Event):
         if (self.sim.num_waiting > 0): # serve the customer who is first in line
             arrival_time = self.sim.arrival_times.pop(0)
             waiting_time = self.sim.t - arrival_time # determine how long this customer has been waiting for
-            self.sim.waiting_times.append(waiting_time)
+            self.sim.waiting_times.append([arrival_time, waiting_time])
             self.sim.num_waiting -= 1
 
             self.sim.num_idle -= 1 # the teller becomes busy
@@ -104,10 +106,12 @@ class BankSimulation():
         self.num_busy = 0 # number of busy tellers
         self.num_lunch = 0 # number of tellers on lunch break
         self.num_lunch_breaks_taken = 0
-
         self.arrival_times = [] # used to calculate waiting time for each customer
-        self.waiting_times = [] # returned after running simulation
-        self.num_waiting_list = [] # also returned
+
+        ### returned at the end of the simulation
+        self.waiting_times = []
+        self.num_waiting_list = []
+        self.lunch_break_times = []
 
     ### Utility functions 
 
@@ -155,20 +159,19 @@ class BankSimulation():
     def run_simulation(self):
         self.engine.schedule(Arrival(0, self))
         event = self.engine.remove()
-        counter = 0
-        while (event != None) and (counter < float("inf")):
+        while (event != None):
             assert self.t <= event.timestamp
             if debug: print("t is {:4.2f}\tevent timestamp is {:4.2f}\tevent type is {:22}\tnum_waiting: {}".format(
                 self.t, event.timestamp, event.__class__.__name__, self.num_waiting))
-            self.num_waiting_list.append(self.num_waiting)
             self.t = event.timestamp
+            self.num_waiting_list.append([self.t, self.num_waiting])
             event.callback()
             event = self.engine.remove()
-            counter += 1
         print("finished simulation")
         return {
             "waiting_times" : self.waiting_times,
             "num_waiting_list" : self.num_waiting_list,
+            "lunch_break_times" : self.lunch_break_times,
         }
 
 
@@ -187,4 +190,13 @@ if __name__ == "__main__":
     end_time = time.time()
 
     print("took {:.2f} seconds to run".format(end_time - start_time))
-    print(evaluation.get_statistics(results["waiting_times"]))
+    print(evaluation.get_statistics([w for t,w in results["waiting_times"]]))
+
+    for data, title, file_name, xlabel, ylabel, time in (
+        (results["waiting_times"], "waiting times", "waitingTimes", "arrival time", "waiting time", True),
+        (results["num_waiting_list"], "number of customers in line", "numCustomersInLine", "time",
+            "number of customers in line", True)):
+
+        plot_name = "lunchBreak={}_numTellers={}_{}.png".format(args.lunch_break_length, args.num_tellers, file_name)
+        plot_path = os.path.join("sim_output", plot_name)
+        evaluation.save_plot(data, title, xlabel, ylabel, plot_path, results["lunch_break_times"], args.lunch_break_length)
