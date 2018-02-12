@@ -6,9 +6,14 @@ import pytest
 
 from bank_sim import BankSimulation
 
-sim = BankSimulation()
+PLACEHOLDER_LUNCH_BREAK_LENGTH = 1
+PLACEHOLDER_NUM_TELLERS = 2
 
-def test_lunch_break_distribution():
+@pytest.fixture()
+def sim():
+    return BankSimulation(PLACEHOLDER_LUNCH_BREAK_LENGTH, PLACEHOLDER_NUM_TELLERS)
+
+def test_lunch_break_distribution(sim):
 	dist = sim.get_lunch_break_distribution()
 
 	x_range = np.linspace(0, 6, 1000)
@@ -17,7 +22,7 @@ def test_lunch_break_distribution():
 	plt.clf()
 
 
-def test_transaction_time_distribution():
+def test_transaction_time_distribution(sim):
 	dist = sim.get_transaction_time_distribution()
 
 	x_range = np.linspace(-0.1, 0.5, 1000)
@@ -30,7 +35,7 @@ def test_transaction_time_distribution():
     (0, "no_rush"),
     (3, "rush"),
 ])
-def test_intercustomer_arrival_time_distribution(t, plot_name):
+def test_intercustomer_arrival_time_distribution(sim, t, plot_name):
 	sim.t = t
 	dist = sim.get_time_before_next_arrival_distribution()
 
@@ -38,7 +43,6 @@ def test_intercustomer_arrival_time_distribution(t, plot_name):
 	plt.plot(x_range, dist.pdf(x_range))
 	plt.savefig(os.path.join("test_output", "intercustomer_arrival_time_dist_{}.png".format(plot_name)))
 	plt.clf()
-	sim.t = 0
 
 
 @pytest.mark.parametrize("t, in_lunchtime", [
@@ -48,10 +52,9 @@ def test_intercustomer_arrival_time_distribution(t, plot_name):
     (4, False), # boundary case
     (5, False),
 ])
-def test_lunchtime(t, in_lunchtime):
+def test_lunchtime(sim, t, in_lunchtime):
 	sim.t = t
 	assert sim.in_lunchtime() == in_lunchtime
-	sim.t = 0
 
 
 @pytest.mark.parametrize("t, in_rush_period", [
@@ -65,8 +68,6 @@ def test_lunchtime(t, in_lunchtime):
     (10, False), # boundary case
     (11, False),
 ])
-def test_rush_period(t, in_rush_period):
+def test_rush_period(sim, t, in_rush_period):
 	sim.t = t
 	assert sim.in_rush_period() == in_rush_period
-	sim.t = 0
-
