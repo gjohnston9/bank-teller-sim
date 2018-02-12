@@ -1,9 +1,11 @@
 from scipy import stats
 
 import argparse
+import time
 
 from engine import Engine
 from engine import Event
+import evaluation
 
 ### Events specific to this simulation
 ###
@@ -105,6 +107,7 @@ class BankSimulation():
 
         self.arrival_times = [] # used to calculate waiting time for each customer
         self.waiting_times = [] # returned after running simulation
+        self.num_waiting_list = [] # also returned
 
     ### Utility functions 
 
@@ -157,12 +160,16 @@ class BankSimulation():
             assert self.t <= event.timestamp
             if debug: print("t is {:4.2f}\tevent timestamp is {:4.2f}\tevent type is {:22}\tnum_waiting: {}".format(
                 self.t, event.timestamp, event.__class__.__name__, self.num_waiting))
+            self.num_waiting_list.append(self.num_waiting)
             self.t = event.timestamp
             event.callback()
             event = self.engine.remove()
             counter += 1
         print("finished simulation")
-        return self.waiting_times
+        return {
+            "waiting_times" : self.waiting_times,
+            "num_waiting_list" : self.num_waiting_list,
+        }
 
 
 if __name__ == "__main__":
@@ -172,7 +179,12 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", action="store_true", help="provide additional simulation output")
 
     args = parser.parse_args()
-
     debug = args.verbose
+
+    start_time = time.time()
     sim = BankSimulation(args.lunch_break_length, args.num_tellers)
-    print(sim.run_simulation())
+    results = sim.run_simulation()
+    end_time = time.time()
+
+    print("took {:.2f} seconds to run".format(end_time - start_time))
+    print(evaluation.get_statistics(results["waiting_times"]))
