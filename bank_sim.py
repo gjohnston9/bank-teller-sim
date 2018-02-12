@@ -137,7 +137,7 @@ class BankSimulation():
             return self.get_truncated_normal(0.08, 0.04, 0, 0.16)
 
     def get_transaction_time_distribution(self):
-        return self.get_truncated_normal(0.2, 0.04, 0, 0.4)
+        return self.get_truncated_normal(0.15, 0.04, 0, 0.3)
 
     def get_lunch_break_distribution(self):
         return self.get_truncated_normal(3, 1, 2, 4)
