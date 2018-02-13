@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.patches as patches
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt; plt.switch_backend('agg')
 
 def get_statistics(lst):
     mean = sum(lst) / float(len(lst))
