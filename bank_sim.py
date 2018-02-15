@@ -46,8 +46,8 @@ class FinishedService(Event):
         self.sim.num_idle += 1
 
         if (self.sim.will_i_take_a_lunch_break()):
-            if debug: print("teller {} is taking a lunch break, starting at time {} and lasting for {} hours".format(
-                self.sim.num_lunch_breaks_taken, self.sim.t, self.sim.lunch_break_length))
+            # if debug: print("teller {} is taking a lunch break, starting at time {} and lasting for {} hours".format(
+                # self.sim.num_lunch_breaks_taken, self.sim.t, self.sim.lunch_break_length))
             self.sim.lunch_break_times.append(self.sim.t)
             self.sim.num_lunch_breaks_taken += 1
             self.sim.num_idle -= 1 # the teller who just finished takes a lunch break
@@ -160,8 +160,8 @@ class BankSimulation():
         event = self.engine.remove()
         while (event != None):
             assert self.t <= event.timestamp
-            if debug: print("t is {:4.2f}\tevent timestamp is {:4.2f}\tevent type is {:22}\tnum_waiting: {}".format(
-                self.t, event.timestamp, event.__class__.__name__, self.num_waiting))
+            # if debug: print("t is {:4.2f}\tevent timestamp is {:4.2f}\tevent type is {:22}\tnum_waiting: {}".format(
+                # self.t, event.timestamp, event.__class__.__name__, self.num_waiting))
             self.t = event.timestamp
             self.num_waiting_list.append([self.t, self.num_waiting])
             event.callback()
@@ -193,13 +193,21 @@ if __name__ == "__main__":
 
     print("took {:.2f} seconds to run".format(end_time - start_time))
 
-    for data, file_name in (
-        (results["waiting_times"], "waitingTimes"),
-        (results["num_waiting_list"], "numCustomersInLine")):
+    for data, data_name, display_name in (
+        (results["waiting_times"], "waitingTimes", "customer waiting times"),
+        (results["num_waiting_list"], "numCustomersInLine", "number of customers in line")):
 
-        name = "lunchBreak={}_numTellers={}_{}.txt".format(args.lunch_break_length, args.num_tellers, file_name)
-        with open(os.path.join("sim_output", "statistics", name), "w") as f:
-            f.write(evaluation.get_statistics([w for t,w in data]))
+        stats = evaluation.get_statistics([w for t,w in data])
+
+        file_name = "lunchBreak={}_numTellers={}_{}.txt".format(args.lunch_break_length, args.num_tellers, data_name)
+        file_path = os.path.join("sim_output", "statistics", file_name)
+        print("saving statistics for {} to {}".format(display_name, file_path))
+        if args.verbose:
+            print("statistics for {} are:".format(display_name))
+            for line in stats.split("\n"):
+                print("\t" + line)
+        with open(file_path, "w") as f:
+            f.write(stats)
 
     for data, title, file_name, xlabel, ylabel, time in (
         (results["waiting_times"], "waiting times", "waitingTimes", "arrival time", "waiting time", True),
@@ -208,4 +216,5 @@ if __name__ == "__main__":
 
         plot_name = "lunchBreak={}_numTellers={}_{}.png".format(args.lunch_break_length, args.num_tellers, file_name)
         plot_path = os.path.join("sim_output", "plots", plot_name)
+        print("saving plot for {} to {}".format(title, plot_path))
         evaluation.save_plot(data, title, xlabel, ylabel, plot_path, results["lunch_break_times"], args.lunch_break_length)
