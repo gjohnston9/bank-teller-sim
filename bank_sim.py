@@ -55,7 +55,7 @@ class FinishedService(Event):
             finished_time = self.sim.t + self.sim.lunch_break_length
             self.sim.engine.schedule(FinishedLunchBreak(finished_time, self.sim))
         else:
-            self.sim.engine.schedule(TellerBecomesFree(self.sim.t, self.sim)) # teller calls next customer
+            self.sim.engine.schedule(TellerBecomesIdle(self.sim.t, self.sim))
 
 
 class FinishedLunchBreak(Event):
@@ -67,10 +67,10 @@ class FinishedLunchBreak(Event):
     def callback(self):
         self.sim.num_lunch -= 1 # teller comes back from lunch
         self.sim.num_idle += 1
-        self.sim.engine.schedule(TellerBecomesFree(self.sim.t, self.sim)) # teller calls next customer
+        self.sim.engine.schedule(TellerBecomesIdle(self.sim.t, self.sim))
 
 
-class TellerBecomesFree(Event):
+class TellerBecomesIdle(Event):
     ### Represents a teller who has just become idle, who will then call the next customer in line if there are any
     def __init__(self, timestamp, sim):
         self.timestamp = timestamp
