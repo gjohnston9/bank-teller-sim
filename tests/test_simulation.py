@@ -71,3 +71,13 @@ def test_lunchtime(sim, t, in_lunchtime):
 def test_rush_period(sim, t, in_rush_period):
 	sim.t = t
 	assert sim.in_rush_period() == in_rush_period
+
+
+@pytest.mark.parametrize("t, is_closing", [
+    (0, False),
+    (12, True), # boundary case
+    (13, True),
+])
+def test_is_closing(sim, t, is_closing):
+	sim.t = t
+	assert sim.is_closing() == is_closing
