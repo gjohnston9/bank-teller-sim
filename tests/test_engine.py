@@ -33,6 +33,7 @@ def test_engine_with_two_events(engine, t1, t2):
 	engine.schedule(Event(t2))
 	assert_timestamps_equal([0, 1], engine)
 	assert engine.remove().timestamp == 0
+	assert engine.remove().timestamp == 1
 
 
 @pytest.mark.parametrize("t1, t2, t3", list(itertools.permutations([1,2,3])))
