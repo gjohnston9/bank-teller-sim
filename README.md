@@ -2,15 +2,16 @@
 
 ## Setting up
 * You will need Python 2 with the `scipy` library installed. If you want to generate plots of simulation output (using the `--generate_plots` flag), you'll need `matplotlib`. If you want to run tests, you'll need `pytest` (and `matplotlib` since the tests generate pdf plots). If you don't have the necessary libraries already, you can follow these instructions:
+* Note: I think you need to do all of this from a compute node but as a TA I'm sure you know what to do better than I do.
 * Download Miniconda installation script: `curl -o conda_install.sh https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh`
-* Install: `bash conda_install.sh` and follow installation instructions.
-* Create a Python 2 environment with scipy, matplotlib, and pytest: `~/miniconda2/bin/conda create -y -n scipy_env scipy matplotlib pytest python=2.7`
-* Start using this environment: `source ~/miniconda2/bin/activate scipy_env`
+* Install: `bash conda_install.sh` and follow installation instructions. After this you may need to restart your shell, or add `~/miniconda2/bin` to your path.
+* Create a Python 2 environment with scipy, matplotlib, and pytest: `conda create -y -n scipy_env scipy matplotlib pytest python=2.7`
+* Start using this environment: `conda activate scipy_env`
 * Go to my project's folder: `cd bank-teller-sim`
-* Refer to **Running the program** section for info on running the simulation.
-* When you're done: `source ~/miniconda2/bin/deactivate` to stop using `scipy_env` and revert to your original Python installation.
+* Refer to the **Running the simulation/tests** sections for info on how to use my project.
+* When you're done: `conda deactivate` to stop using `scipy_env` and revert to your original Python installation.
 
-## Running the program
+## Running the simulation
 * To run with a lunch break length of 0.75 with 2 tellers: `python bank_sim.py 0.75 2 --verbose` (and `--generate_plots` if you'd like to see plots as well)
 * Run `bash run_all.sh` to run the simulation with each combination of parameters that was examined for this project.
 
