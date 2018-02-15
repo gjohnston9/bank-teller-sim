@@ -179,6 +179,7 @@ if __name__ == "__main__":
     parser.add_argument("lunch_break_length", type=float, help="length of each teller's lunch break (in hours)")
     parser.add_argument("num_tellers", type=int, help="number of tellers at the bank")
     parser.add_argument("--verbose", action="store_true", help="provide additional simulation output")
+    parser.add_argument("--generate_plots", action="store_true", help="generate plots of simulation data")
 
     args = parser.parse_args()
     debug = args.verbose
@@ -209,12 +210,13 @@ if __name__ == "__main__":
         with open(file_path, "w") as f:
             f.write(stats)
 
-    for data, title, file_name, xlabel, ylabel, time in (
-        (results["waiting_times"], "waiting times", "waitingTimes", "arrival time", "waiting time", True),
-        (results["num_waiting_list"], "number of customers in line", "numCustomersInLine", "time",
-            "number of customers in line", True)):
+    if args.generate_plots:
+        for data, title, file_name, xlabel, ylabel, time in (
+            (results["waiting_times"], "waiting times", "waitingTimes", "arrival time", "waiting time", True),
+            (results["num_waiting_list"], "number of customers in line", "numCustomersInLine", "time",
+                "number of customers in line", True)):
 
-        plot_name = "lunchBreak={}_numTellers={}_{}.png".format(args.lunch_break_length, args.num_tellers, file_name)
-        plot_path = os.path.join("sim_output", "plots", plot_name)
-        print("saving plot for {} to {}".format(title, plot_path))
-        evaluation.save_plot(data, title, xlabel, ylabel, plot_path, results["lunch_break_times"], args.lunch_break_length)
+            plot_name = "lunchBreak={}_numTellers={}_{}.png".format(args.lunch_break_length, args.num_tellers, file_name)
+            plot_path = os.path.join("sim_output", "plots", plot_name)
+            print("saving plot for {} to {}".format(title, plot_path))
+            evaluation.save_plot(data, title, xlabel, ylabel, plot_path, results["lunch_break_times"], args.lunch_break_length)
