@@ -2,7 +2,6 @@
 
 ## Setting up
 * You will need Python 2 with the `scipy` library installed. If you want to generate plots of simulation output (using the `--generate_plots` flag), you'll need `matplotlib`. If you want to run tests, you'll need `pytest` (and `matplotlib` since the tests generate pdf plots). If you don't have the necessary libraries already, you can follow these instructions:
-* Note: I think you need to do all of this from a compute node but as a TA I'm sure you know what to do better than I do.
 * Download Miniconda installation script: `curl -o conda_install.sh https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh`
 * Install: `bash conda_install.sh` and follow installation instructions. After this you may need to restart your shell, or add `~/miniconda2/bin` to your path (`export PATH="/nethome/YOUR-GT-USERNAME-HERE/miniconda2/bin:$PATH"`).
 * Create a Python 2 environment with scipy, matplotlib, and pytest: `conda create -y -n scipy_env scipy matplotlib pytest python=2.7`
