@@ -8,11 +8,10 @@ from engine import Engine, Event
 import evaluation
 
 ### Events specific to this simulation
-###
-### Each saves a reference to the simulation using it, so that we can access and
-### update that simulation's methods and state variables
 class Arrival(Event):
-    ### Represents the arrival of a new customer
+    """
+    Represents the arrival of a new customer
+    """
     def __init__(self, timestamp, sim):
         self.timestamp = timestamp
         self.sim = sim
@@ -36,7 +35,9 @@ class Arrival(Event):
 
 
 class FinishedService(Event):
-    ### Represents the completion of a customer's interaction with a teller
+    """
+    Represents the completion of a customer's interaction with a teller
+    """
     def __init__(self, timestamp, sim):
         self.timestamp = timestamp
         self.sim = sim
@@ -45,12 +46,10 @@ class FinishedService(Event):
         self.sim.num_busy -= 1 # a teller becomes free
         self.sim.num_idle += 1
 
-        if (self.sim.will_i_take_a_lunch_break()):
-            # if debug: print("teller {} is taking a lunch break, starting at time {} and lasting for {} hours".format(
-                # self.sim.num_lunch_breaks_taken, self.sim.t, self.sim.lunch_break_length))
+        if (self.sim.will_i_take_a_lunch_break()): # the teller who just finished takes a lunch break
             self.sim.lunch_break_times.append(self.sim.t)
             self.sim.num_lunch_breaks_taken += 1
-            self.sim.num_idle -= 1 # the teller who just finished takes a lunch break
+            self.sim.num_idle -= 1
             self.sim.num_lunch += 1
             finished_time = self.sim.t + self.sim.lunch_break_length
             self.sim.engine.schedule(FinishedLunchBreak(finished_time, self.sim))
@@ -59,7 +58,9 @@ class FinishedService(Event):
 
 
 class FinishedLunchBreak(Event):
-    ### Represents the completion of a teller's lunchbreak
+    """
+    Represents the completion of a teller's lunchbreak
+    """
     def __init__(self, timestamp, sim):
         self.timestamp = timestamp
         self.sim = sim
@@ -71,7 +72,9 @@ class FinishedLunchBreak(Event):
 
 
 class TellerBecomesIdle(Event):
-    ### Represents a teller who has just become idle, who will then call the next customer in line if there are any
+    """
+    Represents a teller who has just become idle, who will then call the next customer in line if there are any
+    """
     def __init__(self, timestamp, sim):
         self.timestamp = timestamp
         self.sim = sim
@@ -125,7 +128,9 @@ class BankSimulation():
         return (2 < self.t < 4)
 
     def is_closing(self):
-        ### after 12 hours of operation, the bank stops accepting new customers in line
+        """
+        After 12 hours of operation, the bank stops accepting new customers in line
+        """
         return (self.t >= 12)
 
     ### Probability distributions (defined in their own functions to make testing easier)
@@ -158,14 +163,11 @@ class BankSimulation():
     def run_simulation(self):
         self.engine.schedule(Arrival(0, self))
         event = self.engine.remove()
-        while (event != None):
-            assert self.t <= event.timestamp
-            # if debug: print("t is {:4.2f}\tevent timestamp is {:4.2f}\tevent type is {:22}\tnum_waiting: {}".format(
-                # self.t, event.timestamp, event.__class__.__name__, self.num_waiting))
-            self.t = event.timestamp
-            self.num_waiting_list.append([self.t, self.num_waiting])
-            event.callback()
-            event = self.engine.remove()
+        while (event != None): # main loop
+            self.t = event.timestamp # advance time
+            self.num_waiting_list.append([self.t, self.num_waiting]) # record current time and number of customers in line
+            event.callback() # handle event
+            event = self.engine.remove() # get next event
         print("finished simulation")
         return {
             "waiting_times" : self.waiting_times,
@@ -194,12 +196,12 @@ if __name__ == "__main__":
 
     print("took {:.2f} seconds to run".format(end_time - start_time))
 
+    ### save text statistics
     for data, data_name, display_name in (
         (results["waiting_times"], "waitingTimes", "customer waiting times"),
         (results["num_waiting_list"], "numCustomersInLine", "number of customers in line")):
 
         stats = evaluation.get_statistics([w for t,w in data])
-
         file_name = "lunchBreak={}_numTellers={}_{}.txt".format(args.lunch_break_length, args.num_tellers, data_name)
         file_path = os.path.join("sim_output", "statistics", file_name)
         print("saving statistics for {} to {}".format(display_name, file_path))
@@ -210,6 +212,7 @@ if __name__ == "__main__":
         with open(file_path, "w") as f:
             f.write(stats)
 
+    ### save plots
     if args.generate_plots:
         for data, title, file_name, xlabel, ylabel, time in (
             (results["waiting_times"], "waiting times", "waitingTimes", "arrival time", "waiting time", True),
